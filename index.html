@@ -1,0 +1,742 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#fdfaf6" />
+<title>Decompression — guided micro-meditations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#fdfaf6;
+    --ink:#1a1a1a;
+    --ink-soft:#3a3a3a;
+    --muted:#7a7a7a;
+    --line:#e7e2d9;
+    --paper:#ffffff;
+    --serif:"Cormorant Garamond", "Playfair Display", Georgia, serif;
+    --sans:"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --shadow:0 1px 2px rgba(20,20,20,.04), 0 8px 24px rgba(20,20,20,.06);
+    --shadow-lg:0 4px 12px rgba(20,20,20,.06), 0 24px 48px rgba(20,20,20,.10);
+    --radius:18px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  body{min-height:100svh}
+  a{color:inherit}
+  button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+  img{display:block;max-width:100%}
+
+  /* ============= TOP BAR ============= */
+  .topbar{
+    position:sticky;top:0;z-index:10;
+    backdrop-filter:saturate(140%) blur(10px);
+    -webkit-backdrop-filter:saturate(140%) blur(10px);
+    background:color-mix(in oklab, var(--bg) 82%, transparent);
+    border-bottom:1px solid var(--line);
+  }
+  .topbar-inner{
+    max-width:1180px;margin:0 auto;padding:14px 18px;
+    display:flex;align-items:center;gap:12px;
+  }
+  .brand{
+    font-family:var(--serif);font-weight:600;font-size:22px;letter-spacing:.02em;
+    display:flex;align-items:center;gap:10px;
+  }
+  .brand .dot{width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,#e8a4a4,#a4b6e8)}
+  .brand small{font-family:var(--sans);font-weight:500;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-left:6px}
+  .topbar .spacer{flex:1}
+  .back{
+    display:none;align-items:center;gap:8px;
+    padding:8px 12px;border-radius:999px;border:1px solid var(--line);
+    font-size:13px;font-weight:500;background:var(--paper);
+  }
+  .back svg{width:14px;height:14px}
+  .back:hover{background:#f7f2ea}
+  body[data-route="detail"] .back{display:inline-flex}
+
+  /* ============= HOME ============= */
+  .hero{
+    max-width:1180px;margin:0 auto;padding:38px 22px 6px;
+  }
+  .hero h1{
+    font-family:var(--serif);font-weight:500;
+    font-size:clamp(34px,7vw,56px);line-height:1.05;letter-spacing:.01em;
+    margin:0 0 10px;
+  }
+  .hero p{
+    font-size:15px;line-height:1.6;color:var(--ink-soft);max-width:540px;margin:0;
+  }
+
+  .grid{
+    max-width:1180px;margin:0 auto;padding:24px 18px 80px;
+    display:grid;gap:20px;
+    grid-template-columns:1fr;
+  }
+  @media (min-width:640px){.grid{gap:24px;grid-template-columns:repeat(auto-fill, minmax(280px,1fr))}}
+  @media (min-width:1000px){.grid{gap:28px;grid-template-columns:repeat(auto-fill, minmax(320px,1fr))}}
+
+  .tile{
+    position:relative;
+    aspect-ratio:1/1;
+    border-radius:var(--radius);
+    overflow:hidden;
+    background:var(--paper);
+    box-shadow:var(--shadow);
+    border:1px solid var(--line);
+    cursor:pointer;
+    text-align:left;
+    padding:0;
+    transition:transform .25s ease, box-shadow .25s ease;
+  }
+  .tile:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+  .tile:focus-visible{outline:2px solid #111;outline-offset:3px}
+
+  .tile .wash{
+    position:absolute;inset:0;
+    background:
+      radial-gradient(120% 60% at 50% 0%, var(--c1) 0%, transparent 55%),
+      radial-gradient(120% 60% at 50% 100%, var(--c2) 0%, transparent 55%),
+      var(--paper);
+    opacity:.95;
+  }
+  .tile .wash::after{
+    content:"";position:absolute;inset:0;
+    background-image:
+      radial-gradient(2px 2px at 20% 30%, rgba(255,255,255,.6) 0, transparent 60%),
+      radial-gradient(2px 2px at 80% 70%, rgba(255,255,255,.5) 0, transparent 60%),
+      radial-gradient(1.5px 1.5px at 60% 20%, rgba(255,255,255,.45) 0, transparent 60%);
+    mix-blend-mode:overlay;opacity:.5;
+  }
+
+  .tile .body{
+    position:relative;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:space-between;
+    padding:26px 20px 24px;text-align:center;gap:14px;
+  }
+  .tile .illus{
+    flex:1;display:flex;align-items:center;justify-content:center;
+    width:100%;
+  }
+  .tile .illus img{
+    max-width:78%;max-height:100%;object-fit:contain;
+    filter:drop-shadow(0 4px 8px rgba(0,0,0,.08));
+  }
+  .tile h3{
+    font-family:var(--serif);font-weight:600;font-size:24px;letter-spacing:.01em;
+    margin:0;line-height:1.15;color:var(--ink);
+  }
+  @media (min-width:640px){.tile h3{font-size:22px}}
+  .tile .sub{
+    margin-top:6px;font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--ink-soft);opacity:.75;
+  }
+
+  /* ============= DETAIL CARD ============= */
+  .detail{display:none}
+  body[data-route="detail"] .home{display:none}
+  body[data-route="detail"] .detail{display:block}
+
+  .card{
+    max-width:760px;margin:24px auto 100px;
+    background:var(--paper);
+    border-radius:24px;
+    box-shadow:var(--shadow-lg);
+    overflow:hidden;
+    position:relative;
+    border:1px solid var(--line);
+  }
+  /* watercolor edges, top/bottom */
+  .card .edge{
+    position:absolute;left:0;right:0;height:120px;pointer-events:none;
+    background:
+      radial-gradient(60% 100% at 20% 40%, var(--c1) 0%, transparent 60%),
+      radial-gradient(70% 100% at 80% 60%, var(--c2) 0%, transparent 60%),
+      radial-gradient(40% 80% at 50% 20%, var(--c1) 0%, transparent 70%);
+    opacity:.85;
+    filter:blur(.2px);
+  }
+  .card .edge.top{top:-30px}
+  .card .edge.bot{bottom:-30px;transform:scaleY(-1)}
+  .card .edge::after{
+    content:"";position:absolute;inset:0;
+    background:
+      radial-gradient(1.5px 1.5px at 22% 40%, rgba(255,255,255,.7) 0, transparent 60%),
+      radial-gradient(1.5px 1.5px at 78% 55%, rgba(255,255,255,.65) 0, transparent 60%),
+      radial-gradient(1px 1px at 50% 30%, rgba(255,255,255,.55) 0, transparent 60%);
+    mix-blend-mode:overlay;opacity:.65;
+  }
+
+  .card-head{
+    position:relative;text-align:center;padding:42px 24px 14px;
+  }
+  .card-head h2{
+    font-family:var(--serif);font-weight:500;
+    font-size:clamp(28px,6.4vw,42px);line-height:1.1;letter-spacing:.01em;margin:0;
+  }
+  .card-head .subtitle{
+    margin-top:10px;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--ink-soft);
+  }
+
+  .card-body{
+    position:relative;padding:8px 22px 8px;
+    display:grid;gap:22px;
+    grid-template-columns:1fr;
+    align-items:start;
+  }
+  @media (min-width:720px){
+    .card-body{grid-template-columns:1.05fr 1fr;gap:30px;padding:18px 36px 8px}
+  }
+
+  .illus-wrap{
+    display:flex;align-items:center;justify-content:center;
+    padding:6px 4px 4px;
+  }
+  .illus-wrap img{
+    max-width:100%;max-height:340px;width:auto;height:auto;object-fit:contain;
+    filter:drop-shadow(0 8px 18px rgba(0,0,0,.08));
+  }
+
+  .steps{
+    list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:18px;
+  }
+  .step{
+    text-align:center;position:relative;padding:0 6px;
+  }
+  .step .t{
+    margin:0 0 6px;font-weight:700;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);
+  }
+  .step .d{
+    margin:0 auto;color:var(--ink-soft);font-size:15px;line-height:1.6;max-width:38ch;
+  }
+  .step + .step{margin-top:6px}
+  .step + .step::before{
+    content:"";display:block;width:24px;height:1px;background:#cdc6b8;margin:0 auto 18px;
+  }
+
+  .quote{
+    grid-column:1/-1;
+    margin:28px 6px 22px;padding:26px 22px 22px;
+    border:1px solid #1a1a1a;border-radius:4px;
+    background:transparent;
+    font-style:italic;color:var(--ink-soft);
+    font-size:14px;line-height:1.6;
+    position:relative;
+  }
+  .quote::before{
+    content:"\201C";position:absolute;left:8px;top:-22px;
+    font-family:var(--serif);font-style:normal;font-weight:700;font-size:40px;line-height:1;color:var(--ink);
+    background:var(--paper);padding:0 8px;
+  }
+  .quote::after{
+    content:"\201D";position:absolute;right:8px;bottom:-26px;
+    font-family:var(--serif);font-style:normal;font-weight:700;font-size:40px;line-height:1;color:var(--ink);
+    background:var(--paper);padding:0 8px;
+  }
+
+  .card-foot{
+    position:relative;text-align:center;padding:30px 16px 38px;
+    font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);
+  }
+
+  .actions{
+    position:relative;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;
+    padding:6px 16px 0;
+  }
+  .btn{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:12px 18px;border-radius:999px;
+    border:1px solid #111;background:#111;color:#fff;
+    font-weight:600;font-size:13px;letter-spacing:.06em;
+    transition:transform .15s ease, box-shadow .15s ease, background .15s ease;
+  }
+  .btn:hover{transform:translateY(-1px);box-shadow:0 8px 18px rgba(0,0,0,.18)}
+  .btn.ghost{background:transparent;color:#111}
+  .btn.ghost:hover{background:#f5efe5}
+
+  /* ============= GUIDED MODE ============= */
+  .guided{
+    position:fixed;inset:0;z-index:50;
+    background:var(--bg);
+    display:none;flex-direction:column;
+  }
+  body[data-guided="on"] .guided{display:flex}
+  body[data-guided="on"]{overflow:hidden}
+
+  .guided-edge{
+    position:absolute;left:0;right:0;height:160px;pointer-events:none;
+    background:
+      radial-gradient(60% 100% at 20% 40%, var(--c1) 0%, transparent 60%),
+      radial-gradient(70% 100% at 80% 60%, var(--c2) 0%, transparent 60%),
+      radial-gradient(40% 80% at 50% 20%, var(--c1) 0%, transparent 70%);
+    opacity:.55;
+  }
+  .guided-edge.top{top:-50px}
+  .guided-edge.bot{bottom:-50px;transform:scaleY(-1)}
+
+  .guided-bar{
+    position:relative;
+    display:flex;align-items:center;gap:10px;
+    padding:14px 16px;
+    border-bottom:1px solid var(--line);
+    background:color-mix(in oklab, var(--bg) 80%, transparent);
+    backdrop-filter:blur(10px);
+  }
+  .guided-bar .name{
+    font-family:var(--serif);font-weight:600;font-size:18px;letter-spacing:.01em;
+    flex:1;text-align:center;
+  }
+  .progress{
+    position:relative;display:flex;gap:5px;justify-content:center;padding:10px 16px 0;
+  }
+  .progress span{
+    flex:1;max-width:48px;height:3px;border-radius:2px;background:#e6dfd1;overflow:hidden;
+  }
+  .progress span.done{background:#111}
+  .progress span.active{background:linear-gradient(90deg,#111 0%, #111 var(--p,0%), #e6dfd1 var(--p,0%))}
+
+  .guided-main{
+    position:relative;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:24px 22px;text-align:center;
+  }
+  .guided-main .t{
+    font-weight:700;letter-spacing:.16em;text-transform:uppercase;font-size:14px;margin:0 0 16px;color:var(--ink-soft);
+  }
+  .guided-main .d{
+    font-family:var(--serif);font-weight:500;font-size:clamp(22px,5.4vw,32px);line-height:1.3;
+    margin:0;max-width:22ch;color:var(--ink);
+  }
+  .timer{
+    margin-top:28px;font-family:var(--sans);font-variant-numeric:tabular-nums;
+    font-size:14px;color:var(--muted);letter-spacing:.06em;
+    display:none;
+  }
+  .timer.show{display:block}
+  .breath{
+    margin-top:18px;width:120px;height:120px;border-radius:50%;
+    background:radial-gradient(circle, color-mix(in oklab, var(--c1) 60%, white) 0%, transparent 70%);
+    display:none;align-items:center;justify-content:center;color:var(--ink-soft);
+    font-size:12px;letter-spacing:.18em;text-transform:uppercase;
+    animation:breathe 6s ease-in-out infinite;
+  }
+  .breath.show{display:flex}
+  @keyframes breathe{
+    0%,100%{transform:scale(.7);opacity:.6}
+    50%{transform:scale(1.05);opacity:1}
+  }
+
+  .guided-nav{
+    position:relative;display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:14px 16px calc(18px + env(safe-area-inset-bottom));
+    border-top:1px solid var(--line);
+    background:color-mix(in oklab, var(--bg) 80%, transparent);
+    backdrop-filter:blur(10px);
+  }
+  .guided-nav button{
+    padding:12px 18px;border-radius:999px;font-weight:600;font-size:13px;letter-spacing:.06em;
+    border:1px solid #111;background:#fff;color:#111;
+    min-width:96px;
+  }
+  .guided-nav button:disabled{opacity:.35;cursor:not-allowed}
+  .guided-nav .primary{background:#111;color:#fff}
+  .guided-nav .close{
+    position:absolute;left:14px;top:-46px;background:#fff;border:1px solid var(--line);
+    width:36px;height:36px;border-radius:50%;padding:0;display:none;
+  }
+
+  .close-x{
+    position:absolute;right:14px;top:14px;width:36px;height:36px;border-radius:50%;
+    border:1px solid var(--line);background:#fff;
+    display:flex;align-items:center;justify-content:center;color:#111;z-index:2;
+  }
+  .close-x svg{width:14px;height:14px}
+
+  /* Quote inside steps in detail uses paper bg break for the smart quote characters */
+  .card-body .quote{background:#fff}
+</style>
+</head>
+<body data-route="home">
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="back" id="backBtn" aria-label="Back to all cards">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      All cards
+    </button>
+    <div class="brand">
+      Decompression
+    </div>
+    <div class="spacer"></div>
+  </div>
+</header>
+
+<main>
+  <!-- HOME -->
+  <section class="home">
+    <div class="hero">
+      <h1>Tiny resets for a heavy day</h1>
+      <p>Short, science-backed practices to slow the mind, soften the body, and come back to the moment. Pick one, breathe, and follow along.</p>
+    </div>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <!-- DETAIL -->
+  <section class="detail" id="detail"></section>
+</main>
+
+<!-- GUIDED MODE -->
+<div class="guided" id="guided" role="dialog" aria-modal="true" aria-label="Guided meditation">
+  <button class="close-x" id="guidedClose" aria-label="Exit guided mode">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+  </button>
+  <div class="guided-edge top"></div>
+  <div class="guided-bar">
+    <div class="name" id="guidedName">—</div>
+  </div>
+  <div class="progress" id="guidedProgress"></div>
+  <div class="guided-main">
+    <p class="t" id="guidedTitle">Title</p>
+    <p class="d" id="guidedDesc">Description</p>
+    <div class="timer" id="guidedTimer">0:00</div>
+    <div class="breath" id="guidedBreath">breathe</div>
+  </div>
+  <div class="guided-nav">
+    <button id="prevBtn">Back</button>
+    <button class="primary" id="nextBtn">Next</button>
+  </div>
+  <div class="guided-edge bot"></div>
+</div>
+
+<script>
+const CARDS = [
+  {
+    id:"breathing", n:1, title:"Deep Breathing", subtitle:"4-7-8 breathing exercise",
+    img:"Decompressions/deep_breathing.svg",
+    c1:"#f3d7d9", c2:"#cdb8d6",
+    breath:true,
+    steps:[
+      {t:"Settle In", d:"Sit up straight, feet flat. Close your eyes or soften your gaze."},
+      {t:"Inhale (4 sec)", d:"Breathe in through your nose for 4 seconds.", seconds:4},
+      {t:"Hold (7 sec)", d:"Hold your breath for 7 seconds, staying relaxed.", seconds:7},
+      {t:"Exhale (8 sec)", d:"Exhale slowly through your mouth for 8 seconds.", seconds:8},
+      {t:"Repeat & Reflect", d:"Repeat 4 times. After the last breath, notice how you feel."}
+    ],
+    quote:"Slow, controlled breathing activates the parasympathetic nervous system and calms the amygdala by balancing oxygen and CO₂ (Stanford, 2021)."
+  },
+  {
+    id:"soundscape", n:2, title:"Soundscape Reset", subtitle:"Active listening to ambient sounds",
+    img:"Decompressions/soundscape_reset.svg",
+    c1:"#fbcfc6", c2:"#f7a89c",
+    steps:[
+      {t:"Breathe", d:"Close your eyes and take a deep breath."},
+      {t:"Notice", d:"Identify 5 distinct sounds around you."},
+      {t:"Focus", d:"Tune into one sound at a time — its rhythm and intensity."},
+      {t:"Observe", d:"Listen without judging sounds as “good” or “bad.”"},
+      {t:"Reset", d:"Take three deep breaths and notice your shift in awareness."}
+    ],
+    quote:"Listening to environmental sounds can reduce stress and improve focus by redirecting attention from anxious thoughts (UC Berkeley, 2019)."
+  },
+  {
+    id:"senses", n:3, title:"The 5-Senses Check-In", subtitle:"Quick sensory awareness",
+    img:"Decompressions/5_sense_reset.svg",
+    c1:"#f9c8b8", c2:"#fbdcc9",
+    steps:[
+      {t:"Look Around", d:"Name 5 things you see."},
+      {t:"Feel It", d:"Identify 4 things you can touch."},
+      {t:"Listen In", d:"Notice 3 sounds around you."},
+      {t:"Breathe Deep", d:"Recognize 2 scents in the air."},
+      {t:"Taste It", d:"Identify 1 thing you taste."}
+    ],
+    quote:"Grounding can activate the prefrontal cortex, aiding emotional regulation and reducing overthinking (APA, 2018)."
+  },
+  {
+    id:"stretch", n:4, title:"Stretch & Release", subtitle:"Simple movement to unwind",
+    img:"Decompressions/stretch_and_release.svg",
+    c1:"#d8c6dc", c2:"#bfa9c8",
+    steps:[
+      {t:"Roll Shoulders", d:"Circle shoulders forward 5 times, then backward."},
+      {t:"Stretch Neck", d:"Drop ear to shoulder, hold 10 sec per side.", seconds:20},
+      {t:"Twist Spine", d:"Seated, twist torso with hand on opposite knee. Breathe, then switch."},
+      {t:"Fold Forward", d:"Stand, hinge at hips, let arms hang. Soft knees, hold a few breaths."},
+      {t:"Shake It Out", d:"Shake hands, arms, and legs for 10–15 seconds.", seconds:15}
+    ],
+    quote:"Stretching can release endorphins, lower cortisol, and improve circulation — relaxing muscles and the nervous system (Harvard Medical School, 2020)."
+  },
+  {
+    id:"observation", n:5, title:"Observation Walk", subtitle:"Notice 5 small details around you",
+    img:"Decompressions/observation_walk.svg",
+    c1:"#f1d391", c2:"#e6b870",
+    steps:[
+      {t:"Step Outside", d:"Go outside or to a window and take a deep breath."},
+      {t:"Walk Slowly", d:"Move mindfully, paying attention to your surroundings."},
+      {t:"Notice Details", d:"Find 5 small things you’d usually overlook."},
+      {t:"Pause & Observe", d:"Focus on each detail’s color, shape, texture, or movement."},
+      {t:"Breathe & Reflect", d:"Take a final deep breath. Notice any shift in how you feel."}
+    ],
+    quote:"Engaging with your environment can activate the prefrontal cortex, reducing rumination and stress (Harvard, 2018)."
+  },
+  {
+    id:"tactile", n:6, title:"Tactile Reset", subtitle:"Hands-on sensory grounding",
+    img:"Decompressions/tactile_reset.svg",
+    c1:"#cdd2f5", c2:"#a9b1ea",
+    steps:[
+      {t:"Explore Textures", d:"Touch different surfaces — wood, fabric, ceramic."},
+      {t:"Notice Details", d:"Pay attention to the temperature and texture."},
+      {t:"Engage Temperature", d:"Wrap your hands around a warm drink or run fingers over a cool surface."},
+      {t:"Ground Yourself", d:"Press your feet into the ground and focus on the sensation."}
+    ],
+    quote:"Focusing on touch-based sensations can activate the parasympathetic nervous system and promote relaxation (Somatic Therapy Studies, 2021)."
+  },
+  {
+    id:"word-flow", n:7, title:"Word Flow", subtitle:"Freewriting for mental clarity",
+    img:"Decompressions/word_flow.svg",
+    c1:"#cfe1f7", c2:"#a8c6ef",
+    steps:[
+      {t:"Set the Time", d:"Start a 5-minute timer.", seconds:300},
+      {t:"Write Freely", d:"Write down everything on your mind without filtering."},
+      {t:"If Stuck, Start Simple", d:"Use a prompt like “Right now I feel…”"},
+      {t:"Reflect", d:"After 5 minutes, pause and read what you wrote."}
+    ],
+    quote:"Expressive writing can reduce stress, improve clarity, and support emotional regulation (Pennebaker, 2018)."
+  },
+  {
+    id:"gratitude", n:8, title:"Gratitude Scan", subtitle:"Finding micro-moments of joy",
+    img:"Decompressions/gratitude_scan.svg",
+    c1:"#dad8ea", c2:"#bdb9d7",
+    steps:[
+      {t:"Notice Small Joys", d:"Find something nearby that sparks joy."},
+      {t:"Name the Gratitude", d:"Silently say, “I’m grateful for this moment because…”"},
+      {t:"Explore More", d:"Repeat with 2–3 other things — like textures, colors, or interactions."},
+      {t:"Reflect", d:"Place your hand on your heart and take a deep breath."}
+    ],
+    quote:"Gratitude can reduce stress, improve sleep, and rewire the brain for positivity (UC Berkeley, 2017)."
+  },
+  {
+    id:"doodle", n:9, title:"Micro-Doodle Escape", subtitle:"Freeform drawing for relaxation",
+    img:"Decompressions/micro_doodle.svg",
+    c1:"#dde0a0", c2:"#bdc278",
+    steps:[
+      {t:"Start Drawing", d:"Grab a napkin, notebook, or phone app and begin doodling."},
+      {t:"Move Freely", d:"Let your hand create patterns or shapes without a goal."},
+      {t:"Stay Present", d:"Focus on the motion, not the outcome."},
+      {t:"Reflect", d:"After 5 minutes, notice how you feel.", seconds:300}
+    ],
+    quote:"Doodling can reduce stress, improve focus, and enhance creativity (Andrade, 2010)."
+  },
+  {
+    id:"micro-meditation", n:10, title:"Micro-Meditation", subtitle:"Focusing on one object",
+    img:"Decompressions/coffee_beans.svg",
+    c1:"#cfe3d5", c2:"#a6c8b1",
+    steps:[
+      {t:"Hold an Object", d:"Place a small item (coffee bean, spoon, etc.) in your palm."},
+      {t:"Observe Closely", d:"Notice its texture, shape, and scent like it’s brand new."},
+      {t:"Feel the Details", d:"Roll it between your fingers, exploring every sensation."},
+      {t:"Breathe & Settle", d:"Take deep breaths and let your thoughts quiet."}
+    ],
+    quote:"Focused attention can enhance mindfulness, reduce anxiety, and improve concentration (Harvard Medical School, 2018)."
+  },
+  {
+    id:"water", n:11, title:"20-Second Water Reset", subtitle:"Cool down & refresh in seconds",
+    img:"Decompressions/water_reset.svg",
+    c1:"#bfe0e7", c2:"#7fc1cd",
+    steps:[
+      {t:"Feel the Water", d:"Wash your hands and notice the sensation for 20 seconds.", seconds:20},
+      {t:"Cool Your Wrists", d:"Run cold water over them for a few seconds."},
+      {t:"Sip Slowly", d:"Take a slow sip of cold water, noticing the temperature."}
+    ],
+    quote:"Cold exposure can activate the parasympathetic nervous system and support relaxation (Psychophysiology studies, 2010s)."
+  },
+  {
+    id:"smile", n:12, title:"Fake a Smile", subtitle:"Trick your brain into feeling better",
+    img:"Decompressions/fake_a_smile.svg",
+    c1:"#fbc6a4", c2:"#f4a373",
+    steps:[
+      {t:"Start With a Smile", d:"Smile for 30 seconds, even if it feels forced.", seconds:30},
+      {t:"Notice the Shift", d:"Observe any change in your mood or body."},
+      {t:"Repeat When Needed", d:"Use this quick reset during moments of stress or tension."}
+    ],
+    quote:"Forcing a smile leads to faster stress recovery and more positive emotion during and after stressful situations (Kraft & Pressman, 2012)."
+  }
+];
+
+/* ============ ROUTING ============ */
+const $ = (s, r=document) => r.querySelector(s);
+const grid = $("#grid");
+const detail = $("#detail");
+const backBtn = $("#backBtn");
+
+function setRoute(name){ document.body.dataset.route = name; window.scrollTo({top:0,behavior:"instant"}); }
+
+function renderGrid(){
+  grid.innerHTML = CARDS.map(c => `
+    <button class="tile" data-id="${c.id}" style="--c1:${c.c1};--c2:${c.c2}" aria-label="${c.title}">
+      <div class="wash"></div>
+      <div class="body">
+        <div class="illus"><img src="${c.img}" alt="" loading="lazy"></div>
+        <div>
+          <h3>${c.title}</h3>
+          <div class="sub">${c.subtitle}</div>
+        </div>
+      </div>
+    </button>
+  `).join("");
+  grid.querySelectorAll(".tile").forEach(el => {
+    el.addEventListener("click", () => openCard(el.dataset.id));
+  });
+}
+
+function openCard(id){
+  const c = CARDS.find(x => x.id === id);
+  if (!c) return;
+  document.documentElement.style.setProperty("--c1", c.c1);
+  document.documentElement.style.setProperty("--c2", c.c2);
+
+  const steps = c.steps.map((s) => `
+    <li class="step">
+      <p class="t">${s.t}</p>
+      <p class="d">${s.d}</p>
+    </li>
+  `).join("");
+
+  detail.innerHTML = `
+    <article class="card" style="--c1:${c.c1};--c2:${c.c2}">
+      <div class="edge top"></div>
+      <div class="card-head">
+        <h2>${c.title}</h2>
+        <div class="subtitle">${c.subtitle}</div>
+      </div>
+      <div class="actions">
+        <button class="btn" id="beginBtn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          Begin guided
+        </button>
+      </div>
+      <div class="card-body">
+        <div class="illus-wrap"><img src="${c.img}" alt="${c.title} illustration"></div>
+        <ol class="steps">${steps}</ol>
+        <blockquote class="quote">${c.quote}</blockquote>
+      </div>
+      <div class="edge bot"></div>
+    </article>
+  `;
+  setRoute("detail");
+  $("#beginBtn").addEventListener("click", () => startGuided(c));
+  history.replaceState({card:c.id}, "", `#${c.id}`);
+}
+
+backBtn.addEventListener("click", () => {
+  setRoute("home");
+  history.replaceState({}, "", "#");
+});
+
+/* ============ GUIDED ============ */
+const guided   = $("#guided");
+const gName    = $("#guidedName");
+const gProg    = $("#guidedProgress");
+const gTitle   = $("#guidedTitle");
+const gDesc    = $("#guidedDesc");
+const gTimer   = $("#guidedTimer");
+const gBreath  = $("#guidedBreath");
+const prevBtn  = $("#prevBtn");
+const nextBtn  = $("#nextBtn");
+const gClose   = $("#guidedClose");
+
+let gState = null;
+let timerId = null;
+
+function startGuided(card){
+  gState = { card, i:0 };
+  guided.style.setProperty("--c1", card.c1);
+  guided.style.setProperty("--c2", card.c2);
+  gName.textContent = card.title;
+  gProg.innerHTML = card.steps.map(()=>`<span></span>`).join("");
+  document.body.dataset.guided = "on";
+  renderStep();
+}
+
+function exitGuided(){
+  clearTimer();
+  document.body.dataset.guided = "";
+}
+gClose.addEventListener("click", exitGuided);
+
+function clearTimer(){
+  if (timerId) { clearInterval(timerId); timerId = null; }
+}
+
+function renderStep(){
+  clearTimer();
+  const { card, i } = gState;
+  const step = card.steps[i];
+  gTitle.textContent = step.t;
+  gDesc.textContent = step.d;
+
+  // progress
+  Array.from(gProg.children).forEach((el, idx) => {
+    el.classList.toggle("done", idx < i);
+    el.classList.toggle("active", idx === i);
+    if (idx === i) el.style.setProperty("--p", "0%");
+  });
+
+  // breath orb on the breathing card
+  if (card.breath && (i === 1 || i === 2 || i === 3)) {
+    gBreath.classList.add("show");
+    gBreath.textContent = ({1:"inhale", 2:"hold", 3:"exhale"})[i];
+  } else {
+    gBreath.classList.remove("show");
+  }
+
+  // optional timer
+  if (step.seconds) {
+    gTimer.classList.add("show");
+    runTimer(step.seconds);
+  } else {
+    gTimer.classList.remove("show");
+  }
+
+  prevBtn.disabled = i === 0;
+  nextBtn.textContent = (i === card.steps.length - 1) ? "Done" : "Next";
+}
+
+function runTimer(total){
+  let remaining = total;
+  const activeBar = gProg.children[gState.i];
+  const tick = () => {
+    const m = Math.floor(remaining / 60);
+    const s = remaining % 60;
+    gTimer.textContent = `${m}:${String(s).padStart(2,"0")}`;
+    const pct = ((total - remaining) / total) * 100;
+    if (activeBar) activeBar.style.setProperty("--p", `${pct}%`);
+    if (remaining <= 0) { clearTimer(); }
+    remaining -= 1;
+  };
+  tick();
+  timerId = setInterval(tick, 1000);
+}
+
+prevBtn.addEventListener("click", () => {
+  if (gState.i > 0) { gState.i--; renderStep(); }
+});
+nextBtn.addEventListener("click", () => {
+  if (gState.i < gState.card.steps.length - 1) { gState.i++; renderStep(); }
+  else exitGuided();
+});
+
+document.addEventListener("keydown", (e) => {
+  if (document.body.dataset.guided === "on") {
+    if (e.key === "ArrowRight") nextBtn.click();
+    if (e.key === "ArrowLeft")  prevBtn.click();
+    if (e.key === "Escape")     exitGuided();
+  } else if (document.body.dataset.route === "detail") {
+    if (e.key === "Escape") backBtn.click();
+  }
+});
+
+/* ============ INIT + DEEP LINK ============ */
+renderGrid();
+const hash = location.hash.replace(/^#/, "");
+if (hash && CARDS.some(c => c.id === hash)) openCard(hash);
+</script>
+</body>
+</html>
