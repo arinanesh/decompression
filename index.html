@@ -24,6 +24,7 @@
   }
   *{box-sizing:border-box}
   html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  html{scrollbar-gutter:stable}
   body{min-height:100svh}
   a{color:inherit}
   button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
@@ -217,23 +218,21 @@
 
   .quote{
     grid-column:1/-1;
-    margin:28px 6px 22px;padding:26px 22px 22px;
-    border:1px solid #1a1a1a;border-radius:4px;
-    background:transparent;
+    margin:32px auto 28px;padding:0 18px;
+    max-width:54ch;
+    border:0;background:transparent;
     font-style:italic;color:var(--ink-soft);
-    font-size:14px;line-height:1.6;
+    font-size:14.5px;line-height:1.7;
+    text-align:center;
     position:relative;
   }
   .quote::before{
-    content:"\201C";position:absolute;left:8px;top:-22px;
-    font-family:var(--serif);font-style:normal;font-weight:700;font-size:40px;line-height:1;color:var(--ink);
-    background:var(--paper);padding:0 8px;
+    content:"\201C";display:block;
+    font-family:var(--serif);font-style:normal;font-weight:600;
+    font-size:34px;line-height:.9;color:var(--ink);
+    margin-bottom:6px;opacity:.55;
   }
-  .quote::after{
-    content:"\201D";position:absolute;right:8px;bottom:-26px;
-    font-family:var(--serif);font-style:normal;font-weight:700;font-size:40px;line-height:1;color:var(--ink);
-    background:var(--paper);padding:0 8px;
-  }
+  .quote::after{display:none}
 
   .card-foot{
     position:relative;text-align:center;padding:30px 16px 38px;
@@ -277,7 +276,7 @@
 
   .guided-bar{
     position:relative;
-    display:flex;align-items:center;gap:10px;
+    display:flex;align-items:center;gap:6px;
     padding:14px 16px;
     border-bottom:1px solid var(--line);
     background:color-mix(in oklab, var(--bg) 80%, transparent);
@@ -286,6 +285,21 @@
   .guided-bar .name{
     font-family:var(--serif);font-weight:600;font-size:18px;letter-spacing:.01em;
     flex:1;text-align:center;
+  }
+  .guided-bar .side{display:flex;gap:6px;min-width:44px;position:relative;z-index:3}
+  .guided-bar .side.right{justify-content:flex-end}
+  .toggle{
+    width:38px;height:38px;border-radius:50%;
+    border:1px solid var(--line);background:#fff;color:#111;
+    display:flex;align-items:center;justify-content:center;
+    position:relative;transition:background .15s ease, opacity .15s ease;
+  }
+  .toggle svg{width:16px;height:16px}
+  .toggle:hover{background:#f5efe5}
+  .toggle.off{opacity:.5}
+  .toggle.off::after{
+    content:"";position:absolute;left:7px;right:7px;top:50%;height:1.5px;
+    background:#111;transform:rotate(-32deg);border-radius:2px;
   }
   .progress{
     position:relative;display:flex;gap:5px;justify-content:center;padding:10px 16px 0;
@@ -340,20 +354,26 @@
   }
   .guided-nav button:disabled{opacity:.35;cursor:not-allowed}
   .guided-nav .primary{background:#111;color:#fff}
+  .music-credit{
+    position:relative;text-align:center;font-size:10px;letter-spacing:.06em;
+    color:var(--muted);padding:0 16px 8px;
+  }
+  .music-credit a{color:var(--ink-soft);text-decoration:none;border-bottom:1px dotted var(--muted)}
   .guided-nav .close{
     position:absolute;left:14px;top:-46px;background:#fff;border:1px solid var(--line);
     width:36px;height:36px;border-radius:50%;padding:0;display:none;
   }
 
-  .close-x{
-    position:absolute;right:14px;top:14px;width:36px;height:36px;border-radius:50%;
-    border:1px solid var(--line);background:#fff;
-    display:flex;align-items:center;justify-content:center;color:#111;z-index:2;
+  .icon-btn{
+    width:38px;height:38px;border-radius:50%;
+    border:1px solid #111;background:#fff;color:#111;
+    display:flex;align-items:center;justify-content:center;
+    transition:background .15s ease, color .15s ease;
+    position:relative;z-index:3;
   }
-  .close-x svg{width:14px;height:14px}
+  .icon-btn svg{width:16px;height:16px}
+  .icon-btn:hover{background:#111;color:#fff}
 
-  /* Quote inside steps in detail uses paper bg break for the smart quote characters */
-  .card-body .quote{background:#fff}
 </style>
 </head>
 <body data-route="home">
@@ -387,12 +407,21 @@
 
 <!-- GUIDED MODE -->
 <div class="guided" id="guided" role="dialog" aria-modal="true" aria-label="Guided meditation">
-  <button class="close-x" id="guidedClose" aria-label="Exit guided mode">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
-  </button>
   <div class="guided-edge top"></div>
   <div class="guided-bar">
+    <div class="side">
+      <button class="icon-btn" id="guidedClose" aria-label="Exit guided mode" title="Exit">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
     <div class="name" id="guidedName">—</div>
+    <div class="side right">
+      <button class="toggle" id="musicToggle" aria-label="Toggle music" title="Toggle music">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+        </svg>
+      </button>
+    </div>
   </div>
   <div class="progress" id="guidedProgress"></div>
   <div class="guided-main">
@@ -404,6 +433,9 @@
   <div class="guided-nav">
     <button id="prevBtn">Back</button>
     <button class="primary" id="nextBtn">Next</button>
+  </div>
+  <div class="music-credit">
+    Music: “Ohm” by Jason Shaw — <a href="https://audionautix.com" target="_blank" rel="noopener">audionautix.com</a> · CC&nbsp;BY&nbsp;4.0
   </div>
   <div class="guided-edge bot"></div>
 </div>
@@ -621,7 +653,7 @@ function openCard(id){
     </article>
   `;
   setRoute("detail");
-  $("#beginBtn").addEventListener("click", () => startGuided(c));
+  $("#beginBtn").addEventListener("click", (e) => { e.currentTarget.blur(); startGuided(c); });
   history.replaceState({card:c.id}, "", `#${c.id}`);
 }
 
@@ -641,9 +673,89 @@ const gBreath  = $("#guidedBreath");
 const prevBtn  = $("#prevBtn");
 const nextBtn  = $("#nextBtn");
 const gClose   = $("#guidedClose");
+const musicBtn = $("#musicToggle");
 
 let gState = null;
 let timerId = null;
+
+/* ---- music: CC-BY ambient track ---- */
+const Music = (() => {
+  // "Ohm" by Jason Shaw — audionautix.com, CC BY 4.0
+  // Local file preferred (works from file:// origin); falls back to CDN.
+  const SRCS = ["music.mp3", "https://audionautix.com/Music/Ohm.mp3"];
+  const TARGET = 0.55;
+  let audio = null, fadeTimer = null;
+
+  function fade(target, seconds, done) {
+    const a = audio;
+    if (!a) return;
+    if (fadeTimer) clearInterval(fadeTimer);
+    const startV = a.volume;
+    const delta = target - startV;
+    const steps = Math.max(1, Math.round(seconds * 30));
+    let i = 0;
+    fadeTimer = setInterval(() => {
+      i++;
+      try { a.volume = Math.max(0, Math.min(1, startV + delta * (i / steps))); } catch(_){}
+      if (i >= steps) { clearInterval(fadeTimer); fadeTimer = null; if (done) done(); }
+    }, (seconds * 1000) / steps);
+  }
+
+  function tryPlay(srcIdx) {
+    audio = new Audio(SRCS[srcIdx]);
+    audio.loop = true;
+    audio.preload = "auto";
+    audio.volume = 0;
+    audio.addEventListener("error", () => {
+      console.warn("Music source failed:", SRCS[srcIdx]);
+      if (srcIdx + 1 < SRCS.length) { tryPlay(srcIdx + 1); }
+    });
+    audio.play().catch(err => {
+      console.warn("Music play failed (", SRCS[srcIdx], "):", err);
+      if (srcIdx + 1 < SRCS.length) { tryPlay(srcIdx + 1); }
+    });
+    fade(TARGET, 2.5);
+  }
+
+  function start() {
+    if (audio) return;
+    tryPlay(0);
+  }
+
+  function stop() {
+    if (!audio) return;
+    const a = audio;
+    fade(0, 1.2, () => { try { a.pause(); a.src = ""; a.load(); } catch(_){} });
+    audio = null;
+  }
+
+  function mute(on) {
+    if (!audio) return;
+    fade(on ? 0 : TARGET, 0.5);
+  }
+
+  return { start, stop, mute, get running() { return !!audio; } };
+})();
+
+/* ---- settings ---- */
+const settings = {
+  music: localStorage.getItem("dc.music") !== "off", // default on
+};
+function syncToggles(){
+  musicBtn.classList.toggle("off", !settings.music);
+  musicBtn.setAttribute("aria-pressed", settings.music);
+}
+syncToggles();
+
+musicBtn.addEventListener("click", () => {
+  settings.music = !settings.music;
+  localStorage.setItem("dc.music", settings.music ? "on" : "off");
+  syncToggles();
+  if (document.body.dataset.guided === "on") {
+    if (settings.music) { Music.running ? Music.mute(false) : Music.start(); }
+    else Music.mute(true);
+  }
+});
 
 function startGuided(card){
   gState = { card, i:0 };
@@ -652,11 +764,13 @@ function startGuided(card){
   gName.textContent = card.title;
   gProg.innerHTML = card.steps.map(()=>`<span></span>`).join("");
   document.body.dataset.guided = "on";
+  if (settings.music) Music.start();
   renderStep();
 }
 
 function exitGuided(){
   clearTimer();
+  Music.stop();
   document.body.dataset.guided = "";
 }
 gClose.addEventListener("click", exitGuided);
